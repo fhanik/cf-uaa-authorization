@@ -35,7 +35,8 @@ endpoints:
     # Client token required in request
     # token must be supplied in request
     # browser: false is implied by user: false
-uaa: https://login.cf-system.domain.com
+uaa:
+  uri: https://login.cf-system.domain.com
 client:
   id: myapp_client
   secret: myapp_secret

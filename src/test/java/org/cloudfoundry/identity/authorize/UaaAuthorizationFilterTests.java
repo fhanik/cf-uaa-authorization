@@ -53,7 +53,8 @@ public class UaaAuthorizationFilterTests {
         "    # Client token required in request\n" +
         "    # token must be supplied in request\n" +
         "    # browser: false is implied by user: false\n" +
-        "uaa: https://login.cf-system.domain.com\n" +
+        "uaa:\n" +
+        "  uri: https://login.cf-system.domain.com\n" +
         "client:\n" +
         "  id: myapp_client\n" +
         "  secret: myapp_secret\n" +
@@ -65,6 +66,7 @@ public class UaaAuthorizationFilterTests {
         "  # we should also support setting the token as\n" +
         "  # bearer token so that existing spring app\n" +
         "  # just reads it as it if has not yet been validated.";
+
     private UaaAuthorizationFilter filter;
 
     @Before

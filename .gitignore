@@ -26,3 +26,5 @@ hs_err_pid*
 .gradle/
 cf-uaa-authorization.iml
 build/
+!/src/main/java/org/cloudfoundry/identity/authorize/util/ObjectUtils.java
+!/src/main/java/org/cloudfoundry/identity/authorize/util/StringUtils.java

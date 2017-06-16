@@ -51,10 +51,8 @@ public class UaaAuthorizationFilter implements javax.servlet.Filter {
             configuration.setToken(t);
         }
 
-        if (load.get("uaa")!=null) {
-            String uaa = (String) load.get("uaa");
-            configuration.setUaa(uaa);
-        }
+        Map<String,Object> uaa = (Map<String, Object>) load.get("uaa");
+        configuration.setUaa((String) uaa.get("uri"));
 
         if (load.get("default-access")!=null) {
             String access = (String) load.get("default-access");
