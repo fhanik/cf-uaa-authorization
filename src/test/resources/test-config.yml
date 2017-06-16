@@ -1,0 +1,49 @@
+# both id_token and access_tokens are requested for all browser flows
+default-access: authenticated-session
+# default access requires authentication in form of a bearer token in session
+# user token and authorize flow implied
+# possible values:
+#   - authenticated-session (token in session, browser login)
+#   - authenticated-bearer  (bearer token required)
+#   - insecure (all unlisted endpoints are not checked for security)
+#   - deny-all (if the endpoint is not matched, deny all requests with 401)
+endpoints:
+  - pattern: /deposit**
+    browser: false
+    scope:
+      - user.deposit
+      - user.admin
+    user: true
+    # API endpoint. Doesn't support browser flows, token required in each request
+    # requires a user token with scope user.deposit
+  - pattern: /health_check
+    authenticated: false
+    # API endpoint
+    # No security
+  - pattern: /account/**
+    browser: true
+    scope:
+      - user.view
+    # Browser endpoint that requires a session
+    # User tokens is implied by browser: true
+    # token still evaluated upon each request
+    # because it is stored in the session
+  - pattern: /admin/**
+    user: false
+    scope:
+      - application.admin
+    # Client token required in request
+    # token must be supplied in request
+    # browser: false is implied by user: false
+uaa: https://login.cf-system.domain.com
+client:
+  id: myapp_client
+  secret: myapp_secret
+  # these can be inherited from bound variables too
+token:
+  id: claims
+  access: expose
+  #expose claims only, not the actual token
+  # we should also support setting the token as
+  # bearer token so that existing spring app
+  # just reads it as it if has not yet been validated.
