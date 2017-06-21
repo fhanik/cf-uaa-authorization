@@ -1,17 +1,25 @@
 package org.cloudfoundry.identity.authorize;
 
-import java.net.URI;
-import javax.servlet.FilterConfig;
-
 import org.cloudfoundry.identity.authorize.config.AccessLevel;
+import org.cloudfoundry.identity.authorize.config.AuthorizationConfiguration;
 import org.cloudfoundry.identity.authorize.config.Endpoint;
 import org.cloudfoundry.identity.authorize.config.TokenExposure;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.Mockito;
 
+import javax.servlet.FilterChain;
+import javax.servlet.FilterConfig;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import java.net.URI;
+
 import static org.hamcrest.Matchers.containsInAnyOrder;
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertSame;
+import static org.junit.Assert.assertThat;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 public class UaaAuthorizationFilterTests {
@@ -68,6 +76,9 @@ public class UaaAuthorizationFilterTests {
         "  # just reads it as it if has not yet been validated.";
 
     private UaaAuthorizationFilter filter;
+    private FilterChain chain;
+    private HttpServletResponse response;
+    private HttpServletRequest request;
 
     @Before
     public void setup() throws Exception {
@@ -77,10 +88,13 @@ public class UaaAuthorizationFilterTests {
 
         filter = new UaaAuthorizationFilter();
         filter.init(config);
+        chain = mock(FilterChain.class);
+        request = mock(HttpServletRequest.class);
+        response = mock(HttpServletResponse.class);
     }
 
     @Test
-    public void init() throws Exception {
+    public void test_init() throws Exception {
         AuthorizationConfiguration configuration = filter.getConfiguration();
         assertNotNull(configuration);
         assertNotNull(configuration.getToken());
@@ -109,7 +123,7 @@ public class UaaAuthorizationFilterTests {
                                   boolean user,
                                   String... scopes) {
         assertEquals(pattern, ep.getPattern());
-        String message = "Pattern=" + pattern+": ";
+        String message = "Pattern=" + pattern + ": ";
         assertEquals(message, authenticated, ep.isAuthenticated());
         assertEquals(message, browser, ep.isBrowser());
         assertEquals(message, user, ep.isUser());
@@ -118,11 +132,9 @@ public class UaaAuthorizationFilterTests {
     }
 
     @Test
-    public void doFilter() throws Exception {
+    public void test_no_authentication() throws Exception {
+
     }
 
-    @Test
-    public void destroy() throws Exception {
-    }
 
 }

@@ -1,14 +1,8 @@
-package org.cloudfoundry.identity.authorize;
+package org.cloudfoundry.identity.authorize.config;
 
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.List;
-
-import org.cloudfoundry.identity.authorize.config.AccessLevel;
-import org.cloudfoundry.identity.authorize.config.Client;
-import org.cloudfoundry.identity.authorize.config.Endpoint;
-import org.cloudfoundry.identity.authorize.config.Token;
-import org.cloudfoundry.identity.authorize.config.TokenExposure;
 
 import static java.util.Collections.emptyList;
 import static org.cloudfoundry.identity.authorize.config.TokenExposure.EXPOSE;

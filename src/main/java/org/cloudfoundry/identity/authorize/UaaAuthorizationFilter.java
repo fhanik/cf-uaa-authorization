@@ -1,25 +1,25 @@
 package org.cloudfoundry.identity.authorize;
 
-import java.io.IOException;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.HashSet;
-import java.util.LinkedHashSet;
-import java.util.LinkedList;
-import java.util.Map;
-import java.util.Set;
-import javax.servlet.FilterChain;
-import javax.servlet.FilterConfig;
-import javax.servlet.ServletException;
-import javax.servlet.ServletRequest;
-import javax.servlet.ServletResponse;
-
 import org.cloudfoundry.identity.authorize.config.AccessLevel;
+import org.cloudfoundry.identity.authorize.config.AuthorizationConfiguration;
 import org.cloudfoundry.identity.authorize.config.Client;
 import org.cloudfoundry.identity.authorize.config.Endpoint;
 import org.cloudfoundry.identity.authorize.config.Token;
 import org.cloudfoundry.identity.authorize.config.TokenExposure;
 import org.yaml.snakeyaml.Yaml;
+
+import javax.servlet.FilterChain;
+import javax.servlet.FilterConfig;
+import javax.servlet.ServletException;
+import javax.servlet.ServletRequest;
+import javax.servlet.ServletResponse;
+import java.io.IOException;
+import java.util.Collection;
+import java.util.HashSet;
+import java.util.LinkedHashSet;
+import java.util.LinkedList;
+import java.util.Map;
+import java.util.Set;
 
 import static java.util.Collections.emptySet;
 import static java.util.Optional.ofNullable;
