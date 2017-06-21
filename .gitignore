@@ -23,7 +23,7 @@ hs_err_pid*
 
 # Idea
 .idea/
-#.gradle/
+.gradle/
 cf-uaa-authorization.iml
 build/
 !/src/main/java/org/cloudfoundry/identity/authorize/util/ObjectUtils.java
