@@ -1,5 +1,8 @@
 package org.cloudfoundry.identity.authorize.config;
 
+import org.cloudfoundry.identity.authorize.util.AntPathMatcher;
+
+import javax.servlet.http.HttpServletRequest;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.List;
@@ -26,6 +29,21 @@ public class AuthorizationConfiguration {
             throw new IllegalArgumentException(uaa, e);
         }
     }
+
+    public Endpoint findEndpoint(HttpServletRequest request) {
+        AntPathMatcher matcher = new AntPathMatcher();
+        String pathInfo = request.getPathInfo();
+        if (pathInfo==null || pathInfo.trim().length()==0) {
+            pathInfo = "/";
+        }
+        for (Endpoint ep : endpoints) {
+            if (matcher.match(ep.getPattern(), pathInfo)) {
+                return ep;
+            }
+        }
+        return null;
+    }
+
 
     public void setUaa(URI uaa) {
         this.uaa = uaa;

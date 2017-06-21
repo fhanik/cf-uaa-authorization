@@ -16,39 +16,44 @@ public class Endpoint {
         return pattern;
     }
 
-    public void setPattern(String pattern) {
+    public Endpoint setPattern(String pattern) {
         this.pattern = pattern;
+        return this;
     }
 
     public boolean isBrowser() {
         return browser;
     }
 
-    public void setBrowser(boolean browser) {
+    public Endpoint setBrowser(boolean browser) {
         this.browser = browser;
+        return this;
     }
 
     public Set<String> getScope() {
         return scope;
     }
 
-    public void setScope(Set<String> scope) {
+    public Endpoint setScope(Set<String> scope) {
         this.scope = scope;
+        return this;
     }
 
     public boolean isUser() {
         return user;
     }
 
-    public void setUser(boolean user) {
+    public Endpoint setUser(boolean user) {
         this.user = user;
+        return this;
     }
 
     public boolean isAuthenticated() {
         return authenticated;
     }
 
-    public void setAuthenticated(boolean authenticated) {
+    public Endpoint setAuthenticated(boolean authenticated) {
         this.authenticated = authenticated;
+        return this;
     }
 }

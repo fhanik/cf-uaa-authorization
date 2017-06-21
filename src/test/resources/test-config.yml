@@ -3,12 +3,12 @@ default-access: authenticated-session
 # default access requires authentication in form of a bearer token in session
 # user token and authorize flow implied
 # possible values:
-#   - authenticated-session (token in session, browser login)
+#   - authenticated-session (token in session, browser login, user)
 #   - authenticated-bearer  (bearer token required)
 #   - insecure (all unlisted endpoints are not checked for security)
 #   - deny-all (if the endpoint is not matched, deny all requests with 401)
 endpoints:
-  - pattern: /deposit**
+  - pattern: /deposit/**
     browser: false
     scope:
       - user.deposit

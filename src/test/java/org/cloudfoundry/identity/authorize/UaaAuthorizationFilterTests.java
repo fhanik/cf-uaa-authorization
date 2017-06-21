@@ -1,9 +1,6 @@
 package org.cloudfoundry.identity.authorize;
 
 import org.cloudfoundry.identity.authorize.config.AccessLevel;
-import org.cloudfoundry.identity.authorize.config.AuthorizationConfiguration;
-import org.cloudfoundry.identity.authorize.config.Endpoint;
-import org.cloudfoundry.identity.authorize.config.TokenExposure;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.Mockito;
@@ -12,81 +9,32 @@ import javax.servlet.FilterChain;
 import javax.servlet.FilterConfig;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import java.net.URI;
 
-import static org.hamcrest.Matchers.containsInAnyOrder;
-import static org.junit.Assert.assertEquals;
+import static org.cloudfoundry.identity.authorize.config.ConfigurationParserTest.TEST_YAML;
 import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertSame;
-import static org.junit.Assert.assertThat;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.fail;
+import static org.mockito.ArgumentMatchers.same;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyZeroInteractions;
 import static org.mockito.Mockito.when;
 
 public class UaaAuthorizationFilterTests {
-
-    String testYaml = "# both id_token and access_tokens are requested for all browser flows\n" +
-        "default-access: authenticated-session\n" +
-        "# default access requires authentication in form of a bearer token in session\n" +
-        "# user token and authorize flow implied\n" +
-        "# possible values:\n" +
-        "#   - authenticated-session (token in session, browser login)\n" +
-        "#   - authenticated-bearer  (bearer token required)\n" +
-        "#   - insecure (all unlisted endpoints are not checked for security)\n" +
-        "#   - deny-all (if the endpoint is not matched, deny all requests with 401)\n" +
-        "endpoints:\n" +
-        "  - pattern: /deposit**\n" +
-        "    browser: false\n" +
-        "    scope:\n" +
-        "      - user.deposit\n" +
-        "      - user.admin\n" +
-        "    user: true\n" +
-        "    # API endpoint. Doesn't support browser flows, token required in each request\n" +
-        "    # requires a user token with scope user.deposit\n" +
-        "  - pattern: /health_check\n" +
-        "    authenticated: false\n" +
-        "    # API endpoint\n" +
-        "    # No security\n" +
-        "  - pattern: /account/**\n" +
-        "    browser: true\n" +
-        "    scope:\n" +
-        "      - user.view\n" +
-        "    # Browser endpoint that requires a session\n" +
-        "    # User tokens is implied by browser: true\n" +
-        "    # token still evaluated upon each request\n" +
-        "    # because it is stored in the session\n" +
-        "  - pattern: /admin/**\n" +
-        "    user: false\n" +
-        "    scope:\n" +
-        "      - application.admin\n" +
-        "    # Client token required in request\n" +
-        "    # token must be supplied in request\n" +
-        "    # browser: false is implied by user: false\n" +
-        "uaa:\n" +
-        "  uri: https://login.cf-system.domain.com\n" +
-        "client:\n" +
-        "  id: myapp_client\n" +
-        "  secret: myapp_secret\n" +
-        "  # these can be inherited from bound variables too\n" +
-        "token:\n" +
-        "  id: claims\n" +
-        "  access: expose\n" +
-        "  #expose claims only, not the actual token\n" +
-        "  # we should also support setting the token as\n" +
-        "  # bearer token so that existing spring app\n" +
-        "  # just reads it as it if has not yet been validated.";
 
     private UaaAuthorizationFilter filter;
     private FilterChain chain;
     private HttpServletResponse response;
     private HttpServletRequest request;
+    private UAA uaa;
 
     @Before
     public void setup() throws Exception {
         FilterConfig config = Mockito.mock(FilterConfig.class);
-        when(config.getInitParameter(UaaAuthorizationFilter.PARAM))
-            .thenReturn(testYaml);
-
-        filter = new UaaAuthorizationFilter();
+        when(config.getInitParameter(UaaAuthorizationFilter.PARAM)).thenReturn(TEST_YAML);
+        uaa = mock(UAA.class);
+        filter = new UaaAuthorizationFilter(uaa);
         filter.init(config);
         chain = mock(FilterChain.class);
         request = mock(HttpServletRequest.class);
@@ -95,44 +43,42 @@ public class UaaAuthorizationFilterTests {
 
     @Test
     public void test_init() throws Exception {
-        AuthorizationConfiguration configuration = filter.getConfiguration();
-        assertNotNull(configuration);
-        assertNotNull(configuration.getToken());
-        assertSame(TokenExposure.CLAIMS, configuration.getToken().getIdToken());
-        assertSame(TokenExposure.EXPOSE, configuration.getToken().getAccessToken());
-        assertEquals(new URI("https://login.cf-system.domain.com"), configuration.getUaa());
-        assertNotNull(configuration.getClient());
-        assertEquals("myapp_client", configuration.getClient().getId());
-        assertEquals("myapp_secret", configuration.getClient().getSecret());
-        assertNotNull(configuration.getDefaultAccessLevel());
-        assertSame(AccessLevel.AUTHENTICATED_SESSION, configuration.getDefaultAccessLevel());
-        assertNotNull(configuration.getEndpoints());
-        assertEquals(4, configuration.getEndpoints().size());
-
-        //evaluate first endpoint
-        evaluateEndpoint(configuration.getEndpoints().get(0), "/deposit**", true, false, true, "user.deposit", "user.admin");
-        evaluateEndpoint(configuration.getEndpoints().get(1), "/health_check", false, false, false, new String[0]);
-        evaluateEndpoint(configuration.getEndpoints().get(2), "/account/**", true, true, true, "user.view");
-        evaluateEndpoint(configuration.getEndpoints().get(3), "/admin/**", true, false, false, "application.admin");
-    }
-
-    private void evaluateEndpoint(Endpoint ep,
-                                  String pattern,
-                                  boolean authenticated,
-                                  boolean browser,
-                                  boolean user,
-                                  String... scopes) {
-        assertEquals(pattern, ep.getPattern());
-        String message = "Pattern=" + pattern + ": ";
-        assertEquals(message, authenticated, ep.isAuthenticated());
-        assertEquals(message, browser, ep.isBrowser());
-        assertEquals(message, user, ep.isUser());
-        assertEquals(message, scopes.length, ep.getScope().size());
-        assertThat(message, ep.getScope(), containsInAnyOrder(scopes));
+        assertNotNull(filter.getConfiguration());
     }
 
     @Test
     public void test_no_authentication() throws Exception {
+        when(request.getPathInfo()).thenReturn("/health_check");
+        filter.doFilter(request, response, chain);
+        verify(chain, times(1)).doFilter(same(request), same(response));
+    }
+
+    @Test
+    public void default_session_auth() throws Exception {
+        fail();
+    }
+
+    @Test
+    public void default_deny_all() throws Exception {
+        filter.getConfiguration().setDefaultAccessLevel(AccessLevel.DENY_ALL);
+        when(request.getPathInfo()).thenReturn("/path_not_listed");
+        assertNull(filter.getConfiguration().findEndpoint(request));
+        filter.doFilter(request, response, chain);
+        verify(chain, times(1)).doFilter(same(request), same(response));
+    }
+
+    @Test
+    public void default_insecure() throws Exception {
+        filter.getConfiguration().setDefaultAccessLevel(AccessLevel.INSECURE);
+        when(request.getPathInfo()).thenReturn("/path_not_listed");
+        assertNull(filter.getConfiguration().findEndpoint(request));
+        filter.doFilter(request, response, chain);
+        verifyZeroInteractions(chain);
+
+    }
+
+    @Test
+    public void default_authentication_bearer() throws Exception {
 
     }
 
